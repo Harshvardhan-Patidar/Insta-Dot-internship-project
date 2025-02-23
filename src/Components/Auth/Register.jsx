@@ -12,10 +12,9 @@ const Register = () => {
   const handleRegister = async() => {
     // Simulating user registration
     try {
-      const response = await fetch("http://localhost:5174/register", {
+      const response = await fetch("http://localhost:5173/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ user, email, password }),
       });
 
       if (response.ok) {
@@ -32,7 +31,7 @@ const Register = () => {
   };
 
   const handleSubmit=(formData)=>{
-    const data=Object.fromEntries(formData.entries);
+    const data=Object.fromEntries(formData.entries());
     console.log(data);
   }
 

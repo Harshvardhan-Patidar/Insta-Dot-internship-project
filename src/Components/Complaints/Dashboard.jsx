@@ -16,41 +16,68 @@ const Dashboard = () => {
   };
 
   const handleform=(formData)=>{
-    const data=Object.formEntries(formData.entries);
+    const data=Object.fromEntries(formData.entries());
     console.log(data);
   }
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setComplaints((prevComplaints) =>
-        prevComplaints.filter(
-          (complaint) => !(complaint.votes < 0 && Date.now() - complaint.timestamp > 259200000)
-        )
-      );
-    }, 60000);
-    return () => clearInterval(interval);
+    const fetchComplaints = async () => {
+      try {
+        const response = await fetch("http://localhost:5173/dashboard", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        const data = await response.json();
+        setComplaints(data);
+      } catch (error) {
+        console.error("Error fetching complaints:", error);
+      }
+    };
+    fetchComplaints();
   }, []);
 
-  const handleAddComplaint = () => {
-    setComplaints([...complaints, { id: complaints.length + 1, text: newComplaint, votes: 0, timestamp: Date.now() }]);
-    setNewComplaint("");
+  const handleAddComplaint = async () => {
+    try {
+      const response = await fetch("http://localhost:5173/dashboard", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ text: newComplaint }),
+      });
+
+      if (response.ok) {
+        const newComplaintData = await response.json();
+        setComplaints([...complaints, newComplaintData]);
+        setNewComplaint("");
+      } else {
+        alert("Failed to submit complaint");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
-  const handleVote = (id, change) => {
-    setComplaints(
-      complaints.map((complaint) => {
-        if (complaint.id === id) {
-          const newVotes = complaint.votes + change;
-          const user = "user1"; // Dummy user for now
-          setKarmaScores((prevScores) => ({
-            ...prevScores,
-            [user]: (prevScores[user] || 0) + (change > 0 ? 1 : -1),
-          }));
-          return { ...complaint, votes: newVotes };
-        }
-        return complaint;
-      })
-    );
+  const handleVote = async (id, vote) => {
+    try {
+      const response = await fetch(`http://localhost:5173/dashboard/${id}/vote`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ vote }),
+      });
+
+      if (response.ok) {
+        const updatedComplaint = await response.json();
+        setComplaints(
+          complaints.map((complaint) =>
+            complaint._id === id ? { ...complaint, votes: updatedComplaint.votes } : complaint
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error voting:", error);
+    }
   };
 
   return (

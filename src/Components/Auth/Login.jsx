@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { hstyle, ipstyle, styles } from './style';
+// import { get } from 'mongoose';
 
 
 const Login = () => {
@@ -9,14 +10,36 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = () => {
-    // Simulating authentication
-    localStorage.setItem("token", "dummy-token");
-    navigate("/dashboard");
+  const handleLogin = async() => {
+    try {
+      const response = await fetch("http://localhost:5173/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      });
+
+      // const data1=get("http://localhost:5000/login");
+
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem("token", data.token);
+        navigate("/dashboard");
+      } 
+      else if(response.status==400){
+        alert("User not found");
+        const timeout=setTimeout(() => {
+          navigate("/register");
+        }, 2000);
+      }
+      else {
+        alert("Login Failed!");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
   const handleForm=(formData)=>{
-    const data=Object.formEntries(formData.entries);
+    const data=Object.fromEntries(formData.entries());
     console.log(data);
   }
 
