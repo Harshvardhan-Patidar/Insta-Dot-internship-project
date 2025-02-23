@@ -7,9 +7,6 @@ import Dashboard from "./Components/Complaints/Dashboard";
 import Register from "./Components/Auth/Register";
 import Login from "./Components/Auth/Login";
 
-// const dotenv=require("dotenv");
-// const dbConnection=require("./DB/db")
-// dotenv.config();
 
 const isAuthenticated = () => !!localStorage.getItem("token");
 
@@ -48,7 +45,5 @@ const router = createBrowserRouter([
 const App = () => {
   return <RouterProvider router={router}> </RouterProvider>;
 };
-
-// dbConnection();
 
 export default App;

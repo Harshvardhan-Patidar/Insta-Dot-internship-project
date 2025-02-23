@@ -9,10 +9,26 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleRegister = () => {
+  const handleRegister = async() => {
     // Simulating user registration
-    localStorage.setItem("token", "dummy-jwt-token");
-    navigate("/dashboard");
+    try {
+      const response = await fetch("http://localhost:5174/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (response.ok) {
+        alert("Registration Successful!");
+        navigate("/login");
+      } else if(response.status==400){
+        alert("User already exists!");
+      }else{
+        alert("Registration Failed!");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
   const handleSubmit=(formData)=>{
